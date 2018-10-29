@@ -1,5 +1,5 @@
 /**
- * author Prit Thakkar
+ * author Prit Thakkar, Vagdevi Kasina
  */
 
 
@@ -17,17 +17,19 @@ import java.util.*;
 
 public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
 
-    LinkedList<Vertex> finalList;
-    int topNum;
-    private static boolean isCyclic;
-//    Boolean recStack[];
-    public static class DFSVertex implements Factory {
-        int cno;
+    LinkedList<Vertex> finalList;           //List of Vertex which will give topological order
+    int topNum;                             //helper field to find topological number
+    private static boolean isCyclic;        //boolean variable which shows graph has cycle or not
 
-        boolean seen;
-        Vertex parent;
-        int top;
-        boolean isInRecursionStack;
+
+    public static class DFSVertex implements Factory {
+        int cno;                //component Number
+
+        boolean seen;           //set to true if vertex is already seen while traversing
+        Vertex parent;          //stores parent of the vertex
+        int top;                //position of vertex in topological order
+        boolean isInRecursionStack;     //sets to  true if vertex is in recursionStack
+
 
         public DFSVertex(Vertex u) {
             this.seen = false;
@@ -39,16 +41,24 @@ public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
         public DFSVertex make(Vertex u) { return new DFSVertex(u); }
     }
 
+
     public DFS(Graph g) {
         super(g, new DFSVertex(null));
     }
 
+    /**
+     * @param g graph
+     * @return DFS object, after performing dfs
+     */
     public static DFS depthFirstSearch(Graph g) {
         DFS d = new DFS(g);
         d.dfs();
         return d;
     }
-    // for topologicalOrder1
+
+    /**
+     * method to perform dfs on graph
+     */
     public void dfs(){
 
         finalList = new LinkedList<Vertex>();
@@ -70,6 +80,10 @@ public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
 
     }
 
+    /**
+     *
+     * @param u  Vertex
+     */
     private void dfsVisit(Vertex u) {
 
         get(u).seen = true;
@@ -79,6 +93,7 @@ public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
             Vertex v = e.otherEnd(u);
 
             if(!isCyclic){
+                //check in recursionStack, if vertex already there, then it sets cyclic to true
                 if(get(v).isInRecursionStack) isCyclic = true;
             }
 
@@ -89,15 +104,20 @@ public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
         }
 
         get(u).top = topNum--;
-        finalList.addFirst(u);
-//        recStack[u.getIndex()] = false;
-        get(u).isInRecursionStack = false;
+        finalList.addFirst(u);                  //after completing dfsVisit of the node add to the finalList
+        get(u).isInRecursionStack = false;      //as dfsVisit of vertex is done, it is not in recursionStack so set it to null
     }
 
-    // Member function to find topological order
+    /**
+     * Member function to find topological order
+     * @return list of vertex in topologicalOrder
+     */
     public List<Vertex> topologicalOrder1() {
+        //check if graph is directed, if not return null. Graph should be DAG.
         if(!g.isDirected()) return null;
         this.dfs();
+
+        //return null if there is cycle in the graph
         return isCyclic?null : finalList;
     }
 
@@ -113,7 +133,12 @@ public class DFS extends GraphAlgorithm<DFS.DFSVertex> {
         return get(u).cno;
     }
 
-    // Find topological oder of a DAG using DFS. Returns null if g is not a DAG.
+    /**
+     *
+     *
+     * @param g graph
+     * @return list of vertices in topological order
+     */
     public static List<Vertex> topologicalOrder1(Graph g) {
         DFS d = new DFS(g);
         return d.topologicalOrder1();
